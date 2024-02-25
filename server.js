@@ -13,6 +13,7 @@ var authJwtController = require('./auth_jwt');
 db = require('./db')(); //hack
 var jwt = require('jsonwebtoken');
 var cors = require('cors');
+const { env } = require('process');
 
 var app = express();
 app.use(cors());
@@ -74,7 +75,6 @@ router.post('/signin', (req, res) => {
 
 router.route('/testcollection')
     .delete(authController.isAuthenticated, (req, res) => {
-        console.log(req.body);
         res = res.status(200);
         if (req.get('Content-Type')) {
             res = res.type(req.get('Content-Type'));
@@ -84,7 +84,6 @@ router.route('/testcollection')
     }
     )
     .put(authJwtController.isAuthenticated, (req, res) => {
-        console.log(req.body);
         res = res.status(200);
         if (req.get('Content-Type')) {
             res = res.type(req.get('Content-Type'));
@@ -93,6 +92,54 @@ router.route('/testcollection')
         res.json(o);
     }
     );
+
+    router.route('/movies')
+    .get((req, res) => {
+        //var movie = db.findOne();
+        //console.dir(movie);
+        var o = getJSONObjectForMovieRequirement(req);
+        o.status = 200;
+        o.message = "GET movies";
+        o.headers = req.headers;
+        o.query = req.query;
+        o.key = env.UNIQUE_KEY;
+        res.json(o);
+    })
+    .post((req, res) => {
+        var o = getJSONObjectForMovieRequirement(req);
+        o.status = 200;
+        o.message = "movie saved";
+        o.headers = req.headers;
+        o.query = req.query;
+        o.key = env.UNIQUE_KEY;
+        res.json(o);
+    })
+    .put(authJwtController.isAuthenticated, (req, res) => {
+        var o = getJSONObjectForMovieRequirement(req);
+        o.status = 200;
+        o.message = "movie updated";
+        o.headers = req.headers;
+        o.query = req.query;
+        o.key = env.UNIQUE_KEY;
+        res.json(o);
+
+    })
+    .delete(authController.isAuthenticated, (req, res) => {
+            var o = getJSONObjectForMovieRequirement(req);
+            o.status = 201;
+            o.message = "movie deleted";
+            o.headers = req.headers;
+            o.query = req.query;
+            o.key = env.UNIQUE_KEY;
+            res.json(o);
+
+    })
+    .all((req, res) => {
+        // Any other HTTP Method
+        // Returns a message stating that the HTTP method is unsupported.
+        res.status(405).send({ message: 'HTTP method not supported.' });
+    });
+
     
 app.use('/', router);
 app.listen(process.env.PORT || 8080);
